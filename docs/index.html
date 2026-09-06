@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BGVWC-BlueGS通用语音及文字模仿器</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="site-header topbar">
+        <button id="settingsBtn" class="btn icon-btn" type="button" title="打开设置">⚙</button>
+        <div class="topbar-title">
+            <h1>BGVWC-BlueGS通用语音及文字模仿器 <button id="docsBtn" class="btn btn-important" type="button" title="使用文档">————————————————用前必看的使用文档————————————————</button></h1>
+            <span class="tagline">（二次元🦌晕前的幻想）</span>
+        </div>
+        <span class="topbar-spacer"></span>
+    </header>
+
+    <main class="site-main">
+        <!-- 左侧：会话列表面板 -->
+        <aside class="session-pane card">
+            <div class="session-pane-head">
+                <span class="session-pane-title">会话</span>
+                <button id="newChatBtn" class="btn btn-mini session-new" type="button" title="新开一个会话">＋ 新对话</button>
+            </div>
+            <div id="sessionList" class="session-list"></div>
+        </aside>
+
+        <!-- 右侧：聊天区（模型选择、头像上传、静音、语音播放） -->
+        <section class="card chat-card">
+            <div class="chat-window">
+                <div class="chat-header">
+                    <span class="chat-title">聊天框</span>
+                    <div class="chat-avatarbox" title="点击上传我的头像">
+                        <img id="userAvatarImg" class="avatar" alt="头像">
+                        <input type="file" id="userAvatarFile" accept="image/*" hidden>
+                        <span class="avatar-add">＋</span>
+                    </div>
+                </div>
+
+                <div class="chat-controls">
+                    <p>请选择模型：</p>
+                    <select id="dsModel" class="input model-select">
+                        <option value="deepseek-v4-flash">Deepseek-V4-Flash（推荐）（便宜、快速）</option>
+                        <option value="deepseek-v4-pro">Deepseek-V4-Pro（相对较贵，能力强）</option>
+                        <option value="deepseek-v4-flash-vision-exp">Deepseek-V4-Flash-Vision-EXP（可以识图）</option>
+                    </select>
+                    <label class="chk"><input type="checkbox" id="dsThink"> 打开深度思考（不建议）</label>
+                    <label class="chk"><input type="checkbox" id="dsStream"> 流式输出</label>
+                    <div id="dsToken" class="token">Tokens: —</div>
+                    <button id="dsMuteBtn" class="btn btn-secondary" type="button" title="静音后不合成语音">静音</button>
+                </div>
+
+                <div class="chat-thread" id="chatThread"></div>
+                <div class="chat-imgpreview" id="dsImgPreview" hidden>
+                    <span class="imgpreview-tip">已选择图片（将随消息发送给识图模型）</span>
+                    <div class="imgpreview-row">
+                        <img id="dsImgPreviewImg" class="imgpreview-img" alt="预览">
+                        <button id="dsImgRemove" class="btn btn-mini" type="button" title="移除图片">✕</button>
+                    </div>
+                </div>
+                <div class="chat-inputbar">
+                    <button id="dsImageBtn" class="btn icon-btn" type="button" title="发送图片">🖼️</button>
+                    <input type="file" id="dsImageFile" accept="image/*" hidden>
+                    <textarea id="dsPrompt" class="input chat-input" rows="1"
+                              placeholder="输入你的消息"></textarea>
+                    <button id="dsSendBtn" class="btn" type="button">发送</button>
+                </div>
+            </div>
+            <audio id="chatAudio" class="chat-audio" preload="auto" hidden></audio>
+        </section>
+    </main>
+
+    <!-- ═══════════════════════════ 使用文档 ═══════════════════════════ -->
+    <!-- 请直接在下方 <div id="docsContent">…</div> 里编写文档内容（支持 HTML 标签）。
+         样式已内置对 h1~h4 / p / ul / ol / table / code / pre / blockquote 的基础排版。
+         改完保存并刷新页面即可看到最新文档。 -->
+    <div id="docsModal" class="modal-overlay" hidden>
+        <div class="modal modal-wide" role="dialog" aria-modal="true" aria-label="使用文档">
+            <div class="modal-header">
+                <h2>使用文档</h2>
+                <button id="docsCloseBtn" class="btn btn-mini" type="button" title="关闭">✕</button>
+            </div>
+            <div class="modal-body docs-body">
+                <div id="docsContent">
+                    <h1>注意事项：</h1>
+                    <p>1.本程序由BlueGS编写，保留著作权。</p>
+                    <p>2.用户使用本程序做出的任何行为与BlueGS没有任何关联；任何因为用户自身而触犯的法律问题与BlueGS无关。</p>
+                    <p>3.继续使用该网页表明用户同意以上规定，否则请立即退出！</p>
+                    <p>4.请仔细阅读下面的使用文档，以保证可以正确地使用该网站进行对话。</p>
+                    <h1>使用方法：</h1>
+                    <h2>第一步：获取AI平台的apiKey</h2>
+                    <h3>QwenTTS模型apiKey的获取（用于语音复制以及生成）</h3>
+                    <p>1.访问<a href="https://platform.qianwenai.com/home/api-keys">千问API开放平台</a>。（本程序使用<code>QwenTTS</code>）</p>
+                    <p>2.按提示登录或注册，完成实名认证并充值。（一般充值10元以内）</p>
+                    <p>3.点击左侧API Keys板块，按提示创建apiKey，你会得到一个格式为：<code>sk-ws-H.******************</code>的字符串，请将其当场复制。<blockquote>切记不要把你的apiKey告诉任何人！！！</blockquote></p>
+                    <p>4.将你的apiKey粘贴进入本网页设置界面的 DashScope（QwenTTS）API Key对应的输入框中，然后点击保存。至此QwenTTS设置完成。</p>
+                    <h3>Deepseek模型apiKey的获取</h3>
+                    <p>1.访问<a href="https://platform.deepseek.com/usage">DeepseekAPI开放平台</a></p>
+                    <p>2.按提示登录或注册，完成实名认证并充值。（一般充值10元以内）</p>
+                    <p>3.点击左侧API Keys板块，按提示创建apiKey，你会得到一个格式为：<code>sk-******************</code>的字符串，请将其当场复制。<blockquote>切记不要把你的apiKey告诉任何人！！！</blockquote></p>
+                    <p>4.将你的apiKey粘贴进入本网页设置界面的 DeepSeek API Key 对应的输入框中，然后点击保存。至此Deepseek设置完成。</p>
+                    <hr><hr><hr>
+                    <h2>第二步：编写提示词、上传音声以及预设配置</h2>
+                    <h3>提示词编写</h3>
+                    <h4>方案1：自己写</h4>
+                    <p>1.找到本网页设置里面的 初始提示词（系统角色） 板块</p>
+                    <p>2.在靠上的那个输入框里面输入你对于对面的AI的要求。</p>
+                    <p>例如：</p>
+                    <blockquote>你是一个虚拟歌姬，叫初音未来······（自己写）</blockquote>
+                    <p>也可以上网寻找你想要的角色的提示词。（B站上应该一堆）</p>
+                    <p>3.点击保存提示词</p>
+                    <hr>
+                    <h4>方案2：AI帮写</h4>
+                    <p>1.找到本网页设置里面的 初始提示词（系统角色） 板块</p>
+                    <p>2.在靠下的那个输入框里面尽可能详细地输入你对于这个角色的描述，甚至可以有对话示例。</p>
+                    <p>3.按 ✨ 让 DeepSeek 编写并应用 ，稍等片刻即可发现已经自动填充。</p>
+                    <p>3.点击保存提示词</p>
+                    <hr><hr>
+                    <h3>上传音声</h3>
+                    <p>1.在本网页设置里找到 创建音色 模块</p>
+                    <p>2.填写音色名称以及选择音频文件（两三句你想要的角色的语音就够了，不要太长！！）</p>
+                    <p>3.点击创建音色，待出现<code>✅ 创建成功 voice_id=qwen-tts-vc-********-voice-*******-****（已保存）</code>时，说明已经创建完成，你可以去下面一个模块试听。</p>
+                    <blockquote>如果换设备发现音色列表清空就请完成apiKey获取后点击 查询此Key的音色 来找回</blockquote>
+                    <hr><hr>
+                    <h3>预设保存</h3>
+                    <p>1.在配置好上面全部提到的东西了之后，找到设置里 预设项目 模块。</p>
+                    <p>2.填写预设名称，并点击 保存预设 以后在本设备使用就只需要选择预设即可。</p>
+                    <h1>至此，所有配置已经完成。</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置弹窗：除右侧留存功能外的所有配置都收进这里 -->
+    <div id="settingsModal" class="modal-overlay" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-label="设置">
+            <div class="modal-header">
+                <h2>设置</h2>
+                <button id="settingsCloseBtn" class="btn btn-mini" type="button" title="关闭">✕</button>
+            </div>
+            <div class="modal-body">
+
+                <!-- 预设项目 -->
+                <section class="card">
+                    <h3 class="card-title">预设项目</h3>
+                    <p class="hint">把 DashScope(QwenTTS) Key、DeepSeek Key 与音色绑定为命名预设，随时一键切换。</p>
+                    <div class="row">
+                        <input type="text" id="presetName" class="input flex-1" placeholder="预设名称，如：初音未来">
+                        <button id="presetSaveBtn" class="btn" type="button">保存预设</button>
+                    </div>
+                    <div class="row">
+                        <select id="presetSelect" class="input flex-1"><option value="">— 暂无预设 —</option></select>
+                        <button id="presetLoadBtn" class="btn" type="button">载入</button>
+                        <button id="presetDeleteBtn" class="btn btn-secondary" type="button">删除</button>
+                    </div>
+                    <div id="presetResult" class="result" aria-live="polite"></div>
+                </section>
+
+                <!-- 初始提示词 -->
+                <section class="card">
+                    <h3 class="card-title">初始提示词（系统角色）</h3>
+                    <p class="hint">BlueGS不馋你的token，不上传至服务器</p>
+                    <textarea id="dsSystemPrompt" class="input" rows="4"
+                              placeholder="还是别自己写了去网上找或者找AI帮你写吧"></textarea>
+                    <div class="row">
+                        <button id="dsSystemPromptSave" class="btn" type="button">保存提示词</button>
+                        <div id="dsSystemPromptResult" class="result" aria-live="polite"></div>
+                    </div>
+
+                    <hr class="divider">
+                    <label class="label" for="roleDesc">让 DeepSeek-Flash-0731 帮写提示词</label>
+                    <p class="hint">描述一个角色，AI 将返回可模仿该角色的 Markdown 提示词并自动填入应用。</p>
+                    <textarea id="roleDesc" class="input" rows="3"
+                              placeholder="杂鱼❤杂鱼❤，不会这都不会吧"></textarea>
+                    <div class="row">
+                        <button id="dsPromptAiBtn" class="btn btn-secondary" type="button">✨ 让 DeepSeek 编写并应用</button>
+                        <div id="dsPromptAiResult" class="result" aria-live="polite"></div>
+                    </div>
+                </section>
+
+                <!-- 创建音色 -->
+                <section class="card">
+                    <h3 class="card-title">创建音色</h3>
+                    <label class="label" for="voiceName">音色名称</label>
+                    <input type="text" id="voiceName" class="input" placeholder="你上传的这个语音是哪个角色的？尽量用英文名">
+                    <label class="label" for="sampleFile">上传音频样本</label>
+                    <p class="hint">支持 mp3 / wav / m4a / flac 等；非 mp3 将自动用 ffmpeg 转换。</p>
+                    <input type="file" id="sampleFile" class="input" accept="audio/*">
+                    <!-- 目标模型：固定 qwen3-tts-vc-2026-01-22（隐藏，需与合成一致） -->
+                    <input type="hidden" id="createModel" value="qwen3-tts-vc-2026-01-22">
+                    <label class="label" for="createLang">样本音频语种</label>
+                    <p class="hint">选择你上传的语音属于哪种语言(其实完全可以不填)</p>
+                    <select id="createLang" class="input">
+                        <option value="zh" selected>中文 (zh)</option>
+                        <option value="en">英文 (en)</option>
+                        <option value="de">德语 (de)</option>
+                        <option value="it">意大利语 (it)</option>
+                        <option value="pt">葡萄牙语 (pt)</option>
+                        <option value="es">西班牙语 (es)</option>
+                        <option value="ja">日语 (ja)</option>
+                        <option value="ko">韩语 (ko)</option>
+                        <option value="fr">法语 (fr)</option>
+                        <option value="ru">俄语 (ru)</option>
+                    </select>
+                    <button id="createBtn" class="btn" type="button">创建音色</button>
+                    <div id="createResult" class="result" aria-live="polite"></div>
+                </section>
+
+                <!-- 试听音色（语音合成） -->
+                <section class="card">
+                    <h3 class="card-title">试听音色</h3>
+                    <div class="row">
+                        <select id="voiceSelect" class="input flex-1"><option value="">— 暂无音色，请先创建 —</option></select>
+                        <input type="text" id="voiceIdManual" class="input flex-1" placeholder="或手动输入 voice_id">
+                    </div>
+                    <!-- 合成模型：固定 qwen3-tts-vc-2026-01-22（隐藏，必须与创建音色的 target_model 一致） -->
+                    <input type="hidden" id="synthesizeModel" value="qwen3-tts-vc-2026-01-22">
+                    <label class="label" for="synthesizeText">预览合成文本</label>
+                    <textarea id="synthesizeText" class="input" rows="3" placeholder="输入文字试听该音色"></textarea>
+                    <button id="synthesizeBtn" class="btn" type="button">试听合成</button>
+                    <div id="synthesizeResult" class="result" aria-live="polite"></div>
+                    <audio id="audioPlayer" controls preload="auto"></audio>
+                </section>
+
+                <!-- DeepSeek Key -->
+                <section class="card">
+                    <h3 class="card-title">DeepSeek API Key</h3>
+                    <p class="hint">BlueGS不馋你的token，不上传至服务器</p>
+                    <div class="row">
+                        <select id="dsKeySelect" class="input flex-1"><option value="">— 暂无 —</option></select>
+                        <button id="dsLoadKeyBtn" class="btn" type="button">载入</button>
+                    </div>
+                    <div class="row">
+                        <input type="text" id="dsKey" class="input flex-1" placeholder="sk-..." autocomplete="off">
+                        <button id="dsSaveKeyBtn" class="btn" type="button">保存</button>
+                    </div>
+                    <div id="dsKeyResult" class="result" aria-live="polite"></div>
+                </section>
+
+                <!-- DashScope (QwenTTS) Key -->
+                <section class="card">
+                    <h3 class="card-title">DashScope（QwenTTS）API Key</h3>
+                    <p class="hint">BlueGS不馋你的token，不上传至服务器</p>
+                    <div class="row">
+                        <select id="apiKeySelect" class="input flex-1"><option value="">— 暂无 —</option></select>
+                        <button id="loadKeyBtn" class="btn" type="button">载入</button>
+                    </div>
+                    <div class="row">
+                        <input type="text" id="apiKey" class="input flex-1" placeholder="sk-ws-H.******************" autocomplete="off">
+                        <button id="saveKeyBtn" class="btn" type="button">保存</button>
+                    </div>
+                    <div id="keyResult" class="result" aria-live="polite"></div>
+                    <button id="listVoicesBtn" class="btn" type="button">查询此 apiKey 的音色</button>
+                    <div id="voicesList" class="result" aria-live="polite"></div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <small>Developed by BlueGS</small>
+    </footer>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
