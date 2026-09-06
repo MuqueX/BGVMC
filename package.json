@@ -1,0 +1,14 @@
+{
+  "name": "bluegs-voice-words-cloner-cf",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BlueGS Voice & Words Cloner — Cloudflare Workers 版（Static Assets + Worker）",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:pages": "wrangler pages deploy public"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

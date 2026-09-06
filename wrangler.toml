@@ -1,0 +1,13 @@
+# Cloudflare Worker 部署配置 —— 放在「仓库根目录」（与 package.json、public/ 同级）
+#
+# 关键设计：静态资源和后端逻辑都放在 public/ 子目录，
+# assets.directory 只指向 ./public，这样仓库根目录的 package.json /
+# node_modules / .git 永远不会被当成静态资源上传。
+
+name = "bgvmc"
+main = "public/_worker.js"
+compatibility_date = "2026-08-28"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
