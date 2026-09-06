@@ -1,0 +1,5 @@
+# 构建工具产物 —— 绝不提交
+node_modules/
+.wrangler/
+.env
+*.log
